@@ -1,1 +1,1 @@
-# node-bamboo-app
+# Bamboo App for SDETs... :)
