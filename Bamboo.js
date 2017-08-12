@@ -24,24 +24,41 @@ class Bamboo {
         return jobs;
     }
 
-    async getChanges(plan, from, to) {
+    async getChanges(plan, fromVersion, toVersion) {
 
         let changes = [];
 
-        for (let version = from; version <= (to || from); version++) {
+        for (let version = fromVersion; version <= (toVersion || fromVersion); version++) {
 
             this.options.url = `${this.bambooUrl}/result/${plan}-${version}?expand=changes.change.files`
             changes.push(await this._get(BambooResponseBodyMapper.getChanges));
         }
+        
+        return this._combineChanges(changes);
+    }
 
-        return _
-            .chain(changes)
-            .filter(change => change.length > 0)
-            .flatten()
-            .groupBy('author')
-            .toPairs()
-            .map(this._getChange)
-            .value();
+    async getSuccessfulTests(jobId, version) {
+        this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.successfulTests.testResult.errors`
+    }
+
+    async getFixedTests(jobId, version) {
+        this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.fixedTests.testResult.errors`
+    }
+
+    async getExistingFailedTests(jobId, version) {
+        this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.existingFailedTests.testResult.errors`
+    }
+
+    async getNewFailedTests(jobId, version) {
+        this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.newFailedTests.testResult.errors`
+    }
+
+    async getSkippedTests(jobId, version) {
+        this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.skippedTests.testResult.errors`
+    }
+
+    async getQuarantinedTests(jobId, version) {
+        this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.quarantinedTests.testResult.errors`
     }
 
     _get(bodyMapperFunction) {
@@ -60,7 +77,19 @@ class Bamboo {
         });
     }
 
-    _getChange(groupedChanges) {
+    _combineChanges(changes) {
+
+        return _
+            .chain(changes)
+            .filter(change => change.length > 0)
+            .flatten()
+            .groupBy('author')
+            .toPairs()
+            .map(this._mapGroupedChanges)
+            .value();
+    }
+
+    _mapGroupedChanges(groupedChanges) {
 
         return {
             author: groupedChanges[0],
