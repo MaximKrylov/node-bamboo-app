@@ -37,20 +37,20 @@ class Bamboo {
         return this._combineChanges(changes);
     }
 
-    async getAllTests(jobId, version) {
+    async getJobAllTests(jobId, version) {
 
-        let existingSuccessfulTests = await this.getExistingSuccessfulTests(jobId, version);
-        let fixedTests = await this.getFixedTests(jobId, version);
-        let existingFailedTests = await this.getExistingFailedTests(jobId, version);
-        let newFailedTests = await this.getNewFailedTests(jobId, version);
-        let skippedTests = await this.getSkippedTests(jobId, version);
-        let quarantinedTests = await this.getQuarantinedTests(jobId, version);
+        let existingSuccessfulTests = await this.getJobExistingSuccessfulTests(jobId, version);
+        let fixedTests = await this.getJobFixedTests(jobId, version);
+        let existingFailedTests = await this.getJobExistingFailedTests(jobId, version);
+        let newFailedTests = await this.getJobNewFailedTests(jobId, version);
+        let skippedTests = await this.getJobSkippedTests(jobId, version);
+        let quarantinedTests = await this.getJobQuarantinedTests(jobId, version);
 
         return _
             .concat(existingSuccessfulTests, fixedTests, existingFailedTests, newFailedTests, skippedTests, quarantinedTests);
     }
 
-    async getExistingSuccessfulTests(jobId, version) {
+    async getJobExistingSuccessfulTests(jobId, version) {
 
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.successfulTests.testResult.errors`
         let successfulTests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'successfulTests' });
@@ -65,7 +65,7 @@ class Bamboo {
             .each(existingSuccessfulTests, test => test.status = 'SUCCSESSFUL, EXISTING');
     }
 
-    async getFixedTests(jobId, version) {
+    async getJobFixedTests(jobId, version) {
 
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.fixedTests.testResult.errors`
         let fixedTests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'fixedTests' });
@@ -74,7 +74,7 @@ class Bamboo {
             .each(fixedTests, test => test.status = 'SUCCESSFUL, FIXED');
     }
 
-    async getExistingFailedTests(jobId, version) {
+    async getJobExistingFailedTests(jobId, version) {
 
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.existingFailedTests.testResult.errors`
         let tests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'existingFailedTests' });
@@ -83,7 +83,7 @@ class Bamboo {
             .each(tests, test => test.status = 'FAILED, EXISTING');
     }
 
-    async getNewFailedTests(jobId, version) {
+    async getJobNewFailedTests(jobId, version) {
 
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.newFailedTests.testResult.errors`
         let tests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'newFailedTests' });
@@ -92,7 +92,7 @@ class Bamboo {
             .each(tests, test => test.status = 'FAILED, NEW');
     }
 
-    async getSkippedTests(jobId, version) {
+    async getJobSkippedTests(jobId, version) {
 
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.skippedTests.testResult.errors`
         let tests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'skippedTests' });
@@ -101,7 +101,7 @@ class Bamboo {
             .each(tests, test => test.status = 'SKIPPED')
     }
 
-    async getQuarantinedTests(jobId, version) {
+    async getJobQuarantinedTests(jobId, version) {
 
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.quarantinedTests.testResult.errors`
         let tests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'quarantinedTests' });
