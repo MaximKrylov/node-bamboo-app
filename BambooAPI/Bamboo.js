@@ -29,6 +29,29 @@ class Bamboo {
         return this._combineChanges(changes);
     }
 
+    async getAllTests(projectKey, planKey, buildNumber) {
+
+        let tests = [];
+
+        let jobs = await this.getJobs(projectKey, planKey);
+
+        for (let jobIndex in jobs) {
+
+            let job = jobs[jobIndex];
+
+            try {
+                tests.push(await this.getJobAllTests(job, 'latest'));
+                console.log(`${job.name} FINISHED`);
+            } catch (e) {
+                delete jobs[jobIndex];
+                jobs = _.compact(jobs);
+            }
+        }
+
+        return _
+            .flatten(tests);
+    }
+
     async getJobs(projectKey, planKey, maxResult) {
 
         this.options.url = `${this.bambooUrl}/search/jobs/${projectKey}-${planKey}?max-result=${maxResult || 10000}`;
@@ -40,11 +63,17 @@ class Bamboo {
     async getJobAllTests(job, buildNumber) {
 
         let existingSuccessfulTests = await this.getJobExistingSuccessfulTests(job, buildNumber);
+        console.log(`   -> Getting existing successful tests...`);
         let fixedTests = await this.getJobFixedTests(job, buildNumber);
+        console.log(`   -> Getting fixed tests...`);
         let existingFailedTests = await this.getJobExistingFailedTests(job, buildNumber);
+        console.log(`   -> Getting existing failed tests...`);
         let newFailedTests = await this.getJobNewFailedTests(job, buildNumber);
+        console.log(`   -> Getting failed tests...`);
         let skippedTests = await this.getJobSkippedTests(job, buildNumber);
+        console.log(`   -> Getting skipped tests...`);
         let quarantinedTests = await this.getJobQuarantinedTests(job, buildNumber);
+        console.log(`   -> Getting quarantined tests...`);
 
         return _
             .concat(existingSuccessfulTests, fixedTests, existingFailedTests, newFailedTests, skippedTests, quarantinedTests);
@@ -128,7 +157,7 @@ class Bamboo {
 
         return _
             .each(tests, (test) => {
-                
+
                 test.status = 'QUARANTINED';
                 test.job = job;
             })
