@@ -1,6 +1,6 @@
 (async () => {
 
-    let Bamboo = require('./Bamboo').Bamboo;
+    let Bamboo = require('./BambooAPI/Bamboo').Bamboo;
     let creds = require('./creds');
 
     let bamboo = new Bamboo(creds['user'], creds['password']);

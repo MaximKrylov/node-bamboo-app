@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-const Request = require('./request').Request;
+const Request = require('./Request').Request;
 const BambooResponseBodyMapper = require('./BambooResponseBodyMapper').BambooResponseBodyMapper;
 
 class Bamboo {
