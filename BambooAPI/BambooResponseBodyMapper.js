@@ -37,7 +37,7 @@ class BambooResponseBodyMapper {
     static _getJob(responseJob) {
 
         return {
-            id: responseJob['id'],
+            key: responseJob['searchEntity']['key'],
             name: responseJob['searchEntity']['jobName']
         };
     }
