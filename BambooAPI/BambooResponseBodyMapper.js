@@ -72,8 +72,19 @@ class BambooResponseBodyMapper {
                 .flatten()
                 .uniq()
                 .filter(file => _.endsWith(file, '.feature'))
+                .map(BambooResponseBodyMapper._getFeatureSpecFlowPath)
                 .value()
         };
+    }
+
+    static _getFeatureSpecFlowPath(feature) {
+
+        return _
+            .chain(feature)
+            .replace(/^Source[/]Wilco[.]UITest[/]/, '')
+            .replace(/[.]feature$/, 'Feature')
+            .replace(/[/]/g, '.')
+            .value();
     }
 }
 
