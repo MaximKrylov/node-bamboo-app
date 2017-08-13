@@ -37,6 +37,19 @@ class Bamboo {
         return this._combineChanges(changes);
     }
 
+    async getAllTests(jobId, version) {
+
+        let existingSuccessfulTests = await this.getExistingSuccessfulTests(jobId, version);
+        let fixedTests = await this.getFixedTests(jobId, version);
+        let existingFailedTests = await this.getExistingFailedTests(jobId, version);
+        let newFailedTests = await this.getNewFailedTests(jobId, version);
+        let skippedTests = await this.getSkippedTests(jobId, version);
+        let quarantinedTests = await this.getQuarantinedTests(jobId, version);
+
+        return _
+            .concat(existingSuccessfulTests, fixedTests, existingFailedTests, newFailedTests, skippedTests, quarantinedTests);
+    }
+
     async getExistingSuccessfulTests(jobId, version) {
 
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.successfulTests.testResult.errors`
