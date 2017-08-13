@@ -33,35 +33,71 @@ class Bamboo {
             this.options.url = `${this.bambooUrl}/result/${plan}-${version}?expand=changes.change.files`
             changes.push(await this._get(BambooResponseBodyMapper.getChanges));
         }
-        
+
         return this._combineChanges(changes);
     }
 
-    async getSuccessfulTests(jobId, version) {
+    async getExistingSuccessfulTests(jobId, version) {
+
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.successfulTests.testResult.errors`
+        let successfulTests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'successfulTests' });
+
+        this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.fixedTests.testResult.errors`
+        let fixedTests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'fixedTests' });
+
+        let existingSuccessfulTests = _
+            .xorWith(successfulTests, fixedTests, _.isEqual);
+
+        return _
+            .each(existingSuccessfulTests, test => test.status = 'SUCCSESSFUL, EXISTING');
     }
 
     async getFixedTests(jobId, version) {
+
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.fixedTests.testResult.errors`
+        let fixedTests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'fixedTests' });
+
+        return _
+            .each(fixedTests, test => test.status = 'SUCCESSFUL, FIXED');
     }
 
     async getExistingFailedTests(jobId, version) {
+
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.existingFailedTests.testResult.errors`
+        let tests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'existingFailedTests' });
+
+        return _
+            .each(tests, test => test.status = 'FAILED, EXISTING');
     }
 
     async getNewFailedTests(jobId, version) {
+
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.newFailedTests.testResult.errors`
+        let tests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'newFailedTests' });
+
+        return _
+            .each(tests, test => test.status = 'FAILED, NEW');
     }
 
     async getSkippedTests(jobId, version) {
+
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.skippedTests.testResult.errors`
+        let tests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'skippedTests' });
+
+        return _
+            .each(tests, test => test.status = 'SKIPPED')
     }
 
     async getQuarantinedTests(jobId, version) {
+
         this.options.url = `${this.bambooUrl}/result/${jobId}-${version}?expand=testResults.quarantinedTests.testResult.errors`
+        let tests = await this._get(BambooResponseBodyMapper.getTests, { testsType: 'quarantinedTests' });
+
+        return _
+            .each(tests, test => test.status = 'QUARANTINED')
     }
 
-    _get(bodyMapperFunction) {
+    _get(bodyMapperFunction, paramsObj) {
 
         return Request.get(this.options).then((response) => {
 
@@ -72,7 +108,7 @@ class Bamboo {
                     reject(new Error(response.statusMessage));
                 }
 
-                resolve(bodyMapperFunction(response.body));
+                resolve(bodyMapperFunction(response.body, paramsObj));
             });
         });
     }

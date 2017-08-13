@@ -24,6 +24,16 @@ class BambooResponseBodyMapper {
             .value();
     }
 
+    static getTests(responseBody, paramsObj) {
+
+        let body = JSON.parse(responseBody);
+
+        return _
+            .chain(body['testResults'][paramsObj.testsType]['testResult'])
+            .map(BambooResponseBodyMapper._getTest)
+            .value();
+    }
+
     static _getJob(responseJob) {
 
         return {
@@ -39,6 +49,17 @@ class BambooResponseBodyMapper {
             files: _
                 .map(responseCommit['files']['file'], 'name')
         };
+    }
+
+    static _getTest(responseTest) {
+
+        return {
+            feature: responseTest['className'],
+            scenairo: responseTest['methodName'],
+            errorMessage: (responseTest['errors']['error'][0])
+                ? responseTest['errors']['error'][0]['message']
+                : ''
+        }
     }
 
     static _getChange(transformedResponseCommits) {
