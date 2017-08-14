@@ -1,5 +1,7 @@
-let Bamboo = require('./BambooAPI/Bamboo').Bamboo;
-let creds = require('./creds');
+const _ = require('lodash');
+
+const Bamboo = require('./BambooAPI/Bamboo').Bamboo;
+const creds = require('./creds');
 
 (async () => {
 
@@ -8,8 +10,7 @@ let creds = require('./creds');
 
     let bamboo = new Bamboo(creds['user'], creds['password']);
 
-    let jobs = await bamboo.getJobs(open, uitests);
-    let tests = await bamboo.getAllTests(open, uitests, 'latest');
+    let tests = await bamboo.getAllTests(bamboo, open, uitests, 31);
 
     console.log(tests.length);
 })();

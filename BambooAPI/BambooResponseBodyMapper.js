@@ -10,6 +10,16 @@ class BambooResponseBodyMapper {
             .map(body['searchResults'], BambooResponseBodyMapper._getJob);
     }
 
+    static getTests(responseBody, params) {
+
+        let body = JSON.parse(responseBody);
+
+        return _
+            .chain(body['testResults'][params.testsType]['testResult'])
+            .map(BambooResponseBodyMapper._getTest)
+            .value();
+    }
+
     static getChanges(responseBody) {
 
         let body = JSON.parse(responseBody);
@@ -21,16 +31,6 @@ class BambooResponseBodyMapper {
             .toPairs()
             .map(BambooResponseBodyMapper._getChange)
             .filter(change => change.features.length > 0)
-            .value();
-    }
-
-    static getTests(responseBody, paramsObj) {
-
-        let body = JSON.parse(responseBody);
-
-        return _
-            .chain(body['testResults'][paramsObj.testsType]['testResult'])
-            .map(BambooResponseBodyMapper._getTest)
             .value();
     }
 
@@ -56,6 +56,7 @@ class BambooResponseBodyMapper {
         return {
             feature: responseTest['className'],
             scenairo: responseTest['methodName'],
+            status: ['status'],
             errorMessage: (responseTest['errors']['error'][0])
                 ? responseTest['errors']['error'][0]['message']
                 : ''
