@@ -10,7 +10,7 @@ const creds = require('./creds');
 
     let bamboo = new Bamboo(creds['user'], creds['password']);
 
-    let tests = await bamboo.getAllTests(bamboo, open, uitests, 31);
+    let data = await bamboo.getChanges(open, uitests, 28, 'latest');
+    console.log(data);
 
-    console.log(tests.length);
 })();

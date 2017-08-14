@@ -34,6 +34,12 @@ class BambooResponseBodyMapper {
             .value();
     }
 
+    static getLatestBuildNumber(responseBody) {
+
+        let body = JSON.parse(responseBody);
+        return body['results']['result'][0]['number'];
+    }
+
     static _getJob(responseJob) {
 
         return {

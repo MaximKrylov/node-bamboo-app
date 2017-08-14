@@ -20,7 +20,17 @@ class Bamboo {
 
         let changes = [];
 
-        for (let buildNumber = fromBuildNumber; buildNumber <= (toBuildNumber || fromBuildNumber); buildNumber++) {
+        let from = (fromBuildNumber == 'latest')
+            ? await this.getLatestBuildNumber(projectKey, planKey)
+            : fromBuildNumber;
+
+        let to = (toBuildNumber)
+            ? (toBuildNumber == 'latest')
+                ? await this.getLatestBuildNumber(projectKey, planKey)
+                : toBuildNumber
+            : from;
+
+        for (let buildNumber = from; buildNumber <= to; buildNumber++) {
 
             this.options.url = `${this.bambooUrl}/result/${projectKey}-${planKey}-${buildNumber}?expand=changes.change.files`
             changes.push(await this._get(BambooResponseBodyMapper.getChanges));
@@ -87,6 +97,14 @@ class Bamboo {
 
         return _
             .each(tests, test => test.job = job);
+    }
+
+    async getLatestBuildNumber(projectKey, planKey) {
+
+        this.options.url = `${this.bambooUrl}/result/${projectKey}-${planKey}`;
+        let number = await this._get(BambooResponseBodyMapper.getLatestBuildNumber);
+
+        return number;
     }
 
     _get(bodyMapperFunction, paramsObj) {
