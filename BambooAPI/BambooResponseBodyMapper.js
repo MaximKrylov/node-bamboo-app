@@ -61,10 +61,10 @@ class BambooResponseBodyMapper {
 
         return {
             feature: responseTest['className'],
-            scenairo: responseTest['methodName'],
-            status: ['status'],
+            scenario: responseTest['methodName'],
+            status: responseTest['status'],
             errorMessage: (responseTest['errors']['error'][0])
-                ? responseTest['errors']['error'][0]['message']
+                ? BambooResponseBodyMapper._formatErrorMessage(responseTest['errors']['error'][0]['message'])
                 : ''
         }
     }
@@ -82,6 +82,13 @@ class BambooResponseBodyMapper {
                 .map(BambooResponseBodyMapper._getFeatureSpecFlowPath)
                 .value()
         };
+    }
+
+    static _formatErrorMessage(responseErrorMessage) {
+        return responseErrorMessage
+            .replace(/\r|\n/g, ' ')
+            .replace(/ SCREENSHOT:.*$/, '')
+            .replace(/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/g, '{sid}')
     }
 
     static _getFeatureSpecFlowPath(feature) {

@@ -1,16 +1,34 @@
 const _ = require('lodash');
+const fs = require('async-file');
 
+const bambooCreds = require('./bamboo-creds');
 const Bamboo = require('./BambooAPI/Bamboo').Bamboo;
-const creds = require('./creds');
+
+const project = "CLOUD"; // Open
+const plan = "UTOIC414"; // UTOIC42 - uitests, UTOIC414 - uitests IE
+const build = "2";
 
 (async () => {
+    const bamboo = new Bamboo(bambooCreds['user'], bambooCreds['password']);
+    let tests = await bamboo.getAllTests(project, plan, build);
 
-    let open = 'CLOUD';
-    let uitests = 'UTOIC42';
+    let results = "";
+    let errors = "";
 
-    let bamboo = new Bamboo(creds['user'], creds['password']);
+    _.chain(tests)
+        .filter((test) => {
+            if (test.status === 'failed') {
+                results += `${test.status}\t${test.job.name}\t${test.feature} ${test.scenario}\t${test.errorMessage}\n`;
+                return test;
+            }
+        })
+        .groupBy('errorMessage')
+        .toPairs()
+        .forEach((element) => {
+            errors += `${element[0]}\t${element[1].length}\n`;
+        })
+        .value();
 
-    let data = await bamboo.getChanges(open, uitests, 28, 'latest');
-    console.log(data);
-
+    await fs.writeFile("./results.txt", results, 'binary');
+    await fs.writeFile("./errors.txt", errors, 'binary');
 })();

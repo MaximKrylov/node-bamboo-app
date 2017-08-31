@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/MaximKrylov/node-bamboo-app#readme",
   "dependencies": {
+    "async-file": "^2.0.2",
     "lodash": "4.17.4",
     "request": "2.81.0"
   }
